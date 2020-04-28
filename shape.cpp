@@ -51,7 +51,6 @@ std::shared_ptr<Shape> makeScaledShape(std::shared_ptr<Shape> s, double sx, doub
 	return std::make_shared<ScaledShape>(s, sx, sy);
 }
 
-/************************************** GOAL IS TO DELETE THESE **********************************/
 std::shared_ptr<Shape> makeLayeredShape(std::initializer_list<std::shared_ptr<Shape>> i)
 {
 	return std::make_shared<LayeredShape>(i);
@@ -66,7 +65,6 @@ std::shared_ptr<Shape> makeHorizontalShape(std::initializer_list<std::shared_ptr
 {
 	return std::make_shared<HorizontalShape>(i);
 }
-/************************************** GOAL IS TO DELETE ABOVE **********************************/
 
 Custom::Custom(double faceRadius, double eyeRadius, double mouthRadius): _fRadius(faceRadius),
 	 _eRadius(eyeRadius), _mRadius(mouthRadius){}
