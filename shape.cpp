@@ -51,6 +51,12 @@ std::shared_ptr<Shape> makeScaledShape(std::shared_ptr<Shape> s, double sx, doub
 	return std::make_shared<ScaledShape>(s, sx, sy);
 }
 
+std::shared_ptr<Shape> makeCompositeShape(std::initializer_list<std::shared_ptr<Shape>> i)
+{
+	return std::make_shared<CompositeShape>(i);
+}
+
+/************************************** GOAL IS TO DELETE THESE **********************************/
 std::shared_ptr<Shape> makeLayeredShape(std::initializer_list<std::shared_ptr<Shape>> i)
 {
 	return std::make_shared<LayeredShape>(i);
@@ -65,6 +71,7 @@ std::shared_ptr<Shape> makeHorizontalShape(std::initializer_list<std::shared_ptr
 {
 	return std::make_shared<HorizontalShape>(i);
 }
+/************************************** GOAL IS TO DELETE ABOVE **********************************/
 
 Custom::Custom(double faceRadius, double eyeRadius, double mouthRadius): _fRadius(faceRadius),
 	 _eRadius(eyeRadius), _mRadius(mouthRadius){}
@@ -79,12 +86,13 @@ double Custom::getWidth() const
 	return (2 * _fRadius);
 }
 
-void Custom::genPostScript(std::ostream& os) const 
+std::ostream& Custom::genPostScript(std::ostream& os) const 
 {
 	os << "gsave\n0 0 "<< _fRadius << " 0 360 arc\nstroke\n";
 	os << "0 0 " << _mRadius << " 210 330 arc closepath\nstroke\n";
 	os << "-"<< 2*_eRadius << " " << _eRadius << " " << _eRadius << " 0 360 arc\nstroke\n";
 	os << 2*_eRadius << " " << _eRadius << " " << _eRadius << " 0 360 arc\nstroke\ngrestore\n";
+	return os;
 }
 
 Circle::Circle(double radius): _radius(radius){}
@@ -99,9 +107,10 @@ double Circle::getWidth() const
 	return (2 * _radius);
 }
 
-void Circle::genPostScript(std::ostream& os) const 
+std::ostream& Circle::genPostScript(std::ostream& os) const 
 {
 	os << "gsave\n0 0 " << _radius << " 0 360 arc\nstroke\ngrestore\n";
+	return os;
 }
 
 Polygon::Polygon(int numSides, double length): _numSides(numSides), _length(length){}
@@ -130,7 +139,7 @@ double Polygon::getWidth() const
 	return 0.0;
 }
 
-void Polygon::genPostScript(std::ostream& os) const
+std::ostream& Polygon::genPostScript(std::ostream& os) const
 {
 	os << "gsave\n";
 	double degree = 180 - (double)((180 * (_numSides - 2)) / _numSides);
@@ -138,6 +147,7 @@ void Polygon::genPostScript(std::ostream& os) const
 	for (int i = 0; i < _numSides - 1; ++i)
 		os << degree << " rotate " << _length << " 0 lineto\n";
 	os << "closepath\nstroke\ngrestore\n";
+	return os;
 }
 
 
@@ -154,11 +164,12 @@ double Rectangle::getWidth() const
 }
 
 
-void Rectangle::genPostScript(std::ostream& os) const
+std::ostream& Rectangle::genPostScript(std::ostream& os) const
 {
 	os << "gsave\n-" << _width/2 << " -" << _height/2 << " translate\nnewpath\n0 0 moveto\n"; 
 	os << _width << " 0 lineto\n" << _width << " " << _height << " lineto\n 0 " << _height << " lineto\n";
 	os << "closepath\nstroke\ngrestore\n";	
+	return os;
 }
 
 
@@ -176,12 +187,13 @@ double Spacer::getWidth() const
 }
 
 
-void Spacer::genPostScript(std::ostream& os) const
+std::ostream& Spacer::genPostScript(std::ostream& os) const
 {
 	os << "1 setgray\n";
 	os << "gsave\n-" << _width/2 << " -" << _height/2 << " translate\nnewpath\n0 0 moveto\n"; 
 	os << _width << " 0 lineto\n" << _width << " " << _height << " lineto\n 0 " << _height << " lineto\n";
 	os << "closepath\nstroke\ngrestore\n";	
+	return os;
 }
 
 
@@ -198,11 +210,11 @@ double Triangle::getWidth() const
 }
 
 
-void Triangle::genPostScript(std::ostream& os) const
+std::ostream& Triangle::genPostScript(std::ostream& os) const
 {
 	os << "gsave\n -" << _length / 2 << " -" << (_length / 2) * (sqrt(3.0)) << " tanslate\nnewpath\n0 0 moveto\n" << _length;
 	os << " 0 lineto\n" << _length / 2 << " " << (_length / 2) * (sqrt(3.0)) << " lineto\nclosepath\nstroke\ngrestore\n";
-	
+	return os;
 }
 
 
@@ -243,12 +255,13 @@ double RotatedShape::getWidth() const
 }
 
 
-void RotatedShape::genPostScript(std::ostream& os) const
+std::ostream& RotatedShape::genPostScript(std::ostream& os) const
 {
 	os << "gsave\n";
 	os << _a << " rotate \n";
 	_s->genPostScript(os);
 	os << "grestore\n";
+	return os;
 }
 
 
@@ -265,17 +278,46 @@ double ScaledShape::getWidth() const
 }
 
 
-void ScaledShape::genPostScript(std::ostream& os) const
+std::ostream& ScaledShape::genPostScript(std::ostream& os) const
 {
 	os << _xscale << " " << _yscale <<" scale\n"; 
 	_s->genPostScript(os);
+	return os;
 }
 
-
-LayeredShape::LayeredShape(initializer_list<shared_ptr<Shape>> i)
+CompositeShape::CompositeShape(initializer_list<shared_ptr<Shape>> i) 
 {
 	vector<shared_ptr<Shape>> temp(i.begin(), i.end());
 	_shapes = temp;
+}
+
+std::ostream& CompositeShape::genPostScript(std::ostream& os) const
+{
+	for (auto i = 0l; i < getShapes().size(); ++i) {
+		moveToPositionForShape(os, i);
+		getShapes()[i]->genPostScript(os);
+	}
+	return os;
+}
+
+std::vector<std::shared_ptr<Shape>> CompositeShape::getShapes() const
+{
+	return _shapes;
+}
+
+double CompositeShape::getHeight() const
+{
+	return 0.0;
+}
+
+double CompositeShape::getWidth() const
+{
+	return 0.0;
+}
+LayeredShape::LayeredShape(initializer_list<shared_ptr<Shape>> i): CompositeShape(i)
+{
+	/*vector<shared_ptr<Shape>> temp(i.begin(), i.end());
+	_shapes = temp;*/
 }
 
 double LayeredShape::getHeight() const
@@ -288,20 +330,15 @@ double LayeredShape::getWidth() const
 	return 0.0;
 }
 
-
-void LayeredShape::genPostScript(std::ostream& os) const
+std::ostream& LayeredShape::moveToPositionForShape(std::ostream& os, size_t distance) const
 {
-	for (size_t i = 0; i < _shapes.size(); i++)
-	{
-		_shapes[i]->genPostScript(os);
-	}
+	return os;
 }
 
-
-VerticalShape::VerticalShape(initializer_list<shared_ptr<Shape>> i)
+VerticalShape::VerticalShape(initializer_list<shared_ptr<Shape>> i) : CompositeShape(i)
 {
-	vector<shared_ptr<Shape>> temp(i.begin(), i.end());
-	_shapes = temp;
+	/*vector<shared_ptr<Shape>> temp(i.begin(), i.end());
+	_shapes = temp;*/
 }
 
 double VerticalShape::getHeight() const
@@ -314,23 +351,16 @@ double VerticalShape::getWidth() const
 	return 0.0;
 }
 
-
-void VerticalShape::genPostScript(std::ostream& os) const
+std::ostream& VerticalShape::moveToPositionForShape(std::ostream& os, size_t distance) const
 {
-	for (size_t i = 0; i < _shapes.size(); i++)
-	{	
-		os << "gsave\n";
-		_shapes[i]->genPostScript(os);
-		os << "grestore\n";
-		os  << "0 " << _shapes[i]->getHeight() << " translate\n";
-	}
+	return os;
 }
 
 
-HorizontalShape::HorizontalShape(initializer_list<shared_ptr<Shape>> i)
+HorizontalShape::HorizontalShape(initializer_list<shared_ptr<Shape>> i) : CompositeShape(i)
 {
-	vector<shared_ptr<Shape>> temp(i.begin(), i.end());
-	_shapes = temp;
+	/*vector<shared_ptr<Shape>> temp(i.begin(), i.end());
+	_shapes = temp;*/
 }
 
 double HorizontalShape::getHeight() const
@@ -343,17 +373,12 @@ double HorizontalShape::getWidth() const
 	return 0.0;
 }
 
-
-void HorizontalShape::genPostScript(std::ostream& os) const
+std::ostream& HorizontalShape::moveToPositionForShape(std::ostream& os, size_t distance) const
 {
-	for (size_t i = 0; i < _shapes.size(); i++)
-	{
-		os << "gsave\n";
-		_shapes[i]->genPostScript(os);
-		os << "grestore\n";
-		os << _shapes[i]->getWidth() <<" 0 translate\n";
-	}
+	return os;
 }
+
+
 //helper function to print ps
 void printPostScript(std::ostream & os, const std::shared_ptr<Shape> & shape){
     std::cout << "306 396 translate\n";

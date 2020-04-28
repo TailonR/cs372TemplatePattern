@@ -21,8 +21,9 @@ public:
     virtual ~Shape() = default;
     virtual double getHeight() const = 0;
     virtual double getWidth() const = 0;
-    virtual void genPostScript(std::ostream& os) const = 0;
+    virtual std::ostream& genPostScript(std::ostream& os) const = 0;
 };
+
 
 //helper function for printing post script definition in shape.cpp
 void printPostScript(std::ostream & os, const std::shared_ptr<Shape> & shape);
@@ -38,17 +39,20 @@ std::shared_ptr<Shape> makeSpacer(double width, double height);
 //Fancy Shapes
 std::shared_ptr<Shape> makeRotatedShape(std::shared_ptr<Shape> s, Angle a);
 std::shared_ptr<Shape> makeScaledShape(std::shared_ptr<Shape> s, double sx, double sy);
+std::shared_ptr<Shape> makeCustom(double faceRadius, double eyesRadius, double mouthRadius);
+
+//Composite Shapes
 std::shared_ptr<Shape> makeLayeredShape(std::initializer_list<std::shared_ptr<Shape>> i);
 std::shared_ptr<Shape> makeVerticalShape(std::initializer_list<std::shared_ptr<Shape>> i);
 std::shared_ptr<Shape> makeHorizontalShape(std::initializer_list<std::shared_ptr<Shape>> i);
-std::shared_ptr<Shape> makeCustom(double faceRadius, double eyesRadius, double mouthRadius);
+std::shared_ptr<Shape> makeCompositeShape(std::initializer_list<std::shared_ptr<Shape>> i);
 
 class Custom : public Shape {
 public:
     Custom(double faceRadius, double eyesRadius, double mouthRadius);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
+    std::ostream& genPostScript(std::ostream& os) const override;
 private:
     double _fRadius;
     double _eRadius;
@@ -61,7 +65,7 @@ public:
     Circle(double radius);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
+    std::ostream& genPostScript(std::ostream& os) const override;
 private:
     double _radius;
 };
@@ -71,7 +75,7 @@ public:
     Rectangle(double width, double height);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
+    std::ostream& genPostScript(std::ostream& os) const override;
 private:
     double _width;
     double _height;
@@ -82,7 +86,7 @@ public:
     Polygon(int numSides, double length);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
+    std::ostream& genPostScript(std::ostream& os) const override;
 private:
     int _numSides;
     double _length;
@@ -93,7 +97,7 @@ public:
     Triangle(double length);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
+    std::ostream& genPostScript(std::ostream& os) const override;
 private:
     double _length;
 };
@@ -103,7 +107,7 @@ public:
     Spacer(double width, double height);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
+    std::ostream& genPostScript(std::ostream& os) const override;
 private:
     double _width;
     double _height;
@@ -114,7 +118,7 @@ public:
     RotatedShape(std::shared_ptr<Shape> s, Angle a);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
+    std::ostream& genPostScript(std::ostream& os) const override;
 private:
     std::shared_ptr<Shape> _s;
     int _a;
@@ -125,41 +129,54 @@ public:
     ScaledShape(std::shared_ptr<Shape> s, double xscale, double yscale);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
+    std::ostream& genPostScript(std::ostream& os) const override;
 private:
     std::shared_ptr<Shape> _s;
     double _xscale;
     double _yscale;
 };
 
-class LayeredShape : public Shape {
+class CompositeShape : public Shape {
 public:
+    virtual ~CompositeShape() = default;
+    CompositeShape() {}
+    CompositeShape(std::initializer_list<std::shared_ptr<Shape>> i);
+    std::ostream& genPostScript(std::ostream& os) const override;
+    double getHeight() const override;
+    double getWidth() const override;
+    virtual std::ostream& moveToPositionForShape(std::ostream&, size_t) const = 0;
+private:
+    std::vector<std::shared_ptr<Shape>> _shapes;
+
+protected:
+    virtual std::vector<std::shared_ptr<Shape>> getShapes() const;
+};
+
+class LayeredShape : public CompositeShape {
+public:
+    using CompositeShape::CompositeShape;
     LayeredShape(std::initializer_list<std::shared_ptr<Shape>> i);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
-private:
-    std::vector<std::shared_ptr<Shape>> _shapes;
+    std::ostream& moveToPositionForShape(std::ostream&, size_t) const;
 };
 
-class VerticalShape : public Shape {
+class VerticalShape : public CompositeShape {
 public:
+    using CompositeShape::CompositeShape;
     VerticalShape(std::initializer_list<std::shared_ptr<Shape>> i);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
-private:
-    std::vector<std::shared_ptr<Shape>> _shapes;
+    std::ostream& moveToPositionForShape(std::ostream&, size_t) const;
 };
 
-class HorizontalShape : public Shape {
+class HorizontalShape : public CompositeShape {
 public:
+    using CompositeShape::CompositeShape;
     HorizontalShape(std::initializer_list<std::shared_ptr<Shape>> i);
     double getHeight() const override;
     double getWidth() const override;
-    void genPostScript(std::ostream& os) const override;
-private:
-    std::vector<std::shared_ptr<Shape>> _shapes;
+    std::ostream& moveToPositionForShape(std::ostream&, size_t) const;
 };
 
 #endif

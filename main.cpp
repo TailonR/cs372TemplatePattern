@@ -23,15 +23,23 @@ int main(int argc, char* argv[]) {
     auto myPolygon = makePolygon(5,50);
     auto myRotatedCustom = makeRotatedShape(myCustom, Angle::R90);
     auto myShapeList = {myCircle,myRectangle,myPolygon};
-    auto myLayeredShapes = makeLayeredShape(myShapeList);
-    auto myTriangle = makeTriangle(100);
+    //auto myTriangle = makeTriangle(100);
+    
+    auto myCompositeShapes = makeCompositeShape(myShapeList);
+    /**************** GOAL IS TO DELETE THESE **********************/
+    //auto myLayeredShapes = makeLayeredShape(myShapeList);
+    //auto myVerticalShapes = makeVerticalShape(myShapeList);
+    //auto myHorizontal = makeHorizontalShape(myShapeList);
+    /**************** GOAL IS TO DELETE ABOVE **********************/
 
-    printPostScript(std::cout, myTriangle);
-    printPostScript(std::cout, myCircle);
-    printPostScript(std::cout, myCustom);
-    printPostScript(std::cout, myRectangle);
-    printPostScript(std::cout, myPolygon);
-    printPostScript(std::cout, myRotatedCustom);
+    //printPostScript(std::cout, myTriangle);
+    //printPostScript(std::cout, myCircle);
+    //printPostScript(std::cout, myCustom);
+    //printPostScript(std::cout, myRectangle);
+    //printPostScript(std::cout, myPolygon);
+    //printPostScript(std::cout, myRotatedCustom);
+    /*printPostScript(std::cout, myLayeredShapes);
     printPostScript(std::cout, myLayeredShapes);
+    printPostScript(std::cout, myLayeredShapes);*/
     return 0;
 }
