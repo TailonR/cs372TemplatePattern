@@ -45,7 +45,6 @@ std::shared_ptr<Shape> makeCustom(double faceRadius, double eyesRadius, double m
 std::shared_ptr<Shape> makeLayeredShape(std::initializer_list<std::shared_ptr<Shape>> i);
 std::shared_ptr<Shape> makeVerticalShape(std::initializer_list<std::shared_ptr<Shape>> i);
 std::shared_ptr<Shape> makeHorizontalShape(std::initializer_list<std::shared_ptr<Shape>> i);
-std::shared_ptr<Shape> makeCompositeShape(std::initializer_list<std::shared_ptr<Shape>> i);
 
 class Custom : public Shape {
 public:
@@ -142,8 +141,6 @@ public:
     CompositeShape() {}
     CompositeShape(std::initializer_list<std::shared_ptr<Shape>> i);
     std::ostream& genPostScript(std::ostream& os) const override;
-    double getHeight() const override;
-    double getWidth() const override;
     virtual std::ostream& moveToPositionForShape(std::ostream&, size_t) const = 0;
 private:
     std::vector<std::shared_ptr<Shape>> _shapes;
@@ -158,7 +155,7 @@ public:
     LayeredShape(std::initializer_list<std::shared_ptr<Shape>> i);
     double getHeight() const override;
     double getWidth() const override;
-    std::ostream& moveToPositionForShape(std::ostream&, size_t) const;
+    std::ostream& moveToPositionForShape(std::ostream&, size_t) const override;
 };
 
 class VerticalShape : public CompositeShape {
@@ -167,7 +164,7 @@ public:
     VerticalShape(std::initializer_list<std::shared_ptr<Shape>> i);
     double getHeight() const override;
     double getWidth() const override;
-    std::ostream& moveToPositionForShape(std::ostream&, size_t) const;
+    std::ostream& moveToPositionForShape(std::ostream&, size_t) const override;
 };
 
 class HorizontalShape : public CompositeShape {
@@ -176,7 +173,7 @@ public:
     HorizontalShape(std::initializer_list<std::shared_ptr<Shape>> i);
     double getHeight() const override;
     double getWidth() const override;
-    std::ostream& moveToPositionForShape(std::ostream&, size_t) const;
+    std::ostream& moveToPositionForShape(std::ostream&, size_t) const override;
 };
 
 #endif

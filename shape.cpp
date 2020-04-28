@@ -51,11 +51,6 @@ std::shared_ptr<Shape> makeScaledShape(std::shared_ptr<Shape> s, double sx, doub
 	return std::make_shared<ScaledShape>(s, sx, sy);
 }
 
-std::shared_ptr<Shape> makeCompositeShape(std::initializer_list<std::shared_ptr<Shape>> i)
-{
-	return std::make_shared<CompositeShape>(i);
-}
-
 /************************************** GOAL IS TO DELETE THESE **********************************/
 std::shared_ptr<Shape> makeLayeredShape(std::initializer_list<std::shared_ptr<Shape>> i)
 {
@@ -305,20 +300,8 @@ std::vector<std::shared_ptr<Shape>> CompositeShape::getShapes() const
 	return _shapes;
 }
 
-double CompositeShape::getHeight() const
-{
-	return 0.0;
-}
-
-double CompositeShape::getWidth() const
-{
-	return 0.0;
-}
 LayeredShape::LayeredShape(initializer_list<shared_ptr<Shape>> i): CompositeShape(i)
-{
-	/*vector<shared_ptr<Shape>> temp(i.begin(), i.end());
-	_shapes = temp;*/
-}
+{}
 
 double LayeredShape::getHeight() const
 {
@@ -336,10 +319,7 @@ std::ostream& LayeredShape::moveToPositionForShape(std::ostream& os, size_t dist
 }
 
 VerticalShape::VerticalShape(initializer_list<shared_ptr<Shape>> i) : CompositeShape(i)
-{
-	/*vector<shared_ptr<Shape>> temp(i.begin(), i.end());
-	_shapes = temp;*/
-}
+{}
 
 double VerticalShape::getHeight() const
 {
@@ -351,17 +331,15 @@ double VerticalShape::getWidth() const
 	return 0.0;
 }
 
-std::ostream& VerticalShape::moveToPositionForShape(std::ostream& os, size_t distance) const
+std::ostream& VerticalShape::moveToPositionForShape(std::ostream& os, size_t index) const
 {
+	os << "0 " << getShapes()[index]->getHeight() << " translate\n";
 	return os;
 }
 
 
 HorizontalShape::HorizontalShape(initializer_list<shared_ptr<Shape>> i) : CompositeShape(i)
-{
-	/*vector<shared_ptr<Shape>> temp(i.begin(), i.end());
-	_shapes = temp;*/
-}
+{}
 
 double HorizontalShape::getHeight() const
 {
@@ -373,8 +351,9 @@ double HorizontalShape::getWidth() const
 	return 0.0;
 }
 
-std::ostream& HorizontalShape::moveToPositionForShape(std::ostream& os, size_t distance) const
+std::ostream& HorizontalShape::moveToPositionForShape(std::ostream& os, size_t index) const
 {
+	os << getShapes()[index]->getWidth() << " 0 translate\n";
 	return os;
 }
 

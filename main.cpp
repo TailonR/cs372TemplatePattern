@@ -8,14 +8,6 @@
 
 
 int main(int argc, char* argv[]) {
-    Catch::Session testing;
-    int catchresult;
-    catchresult = testing.applyCommandLine(argc, argv);
-    if (!catchresult) {
-        std::cout << "Begin tests for class shapes and its derived classes: \n";
-        catchresult = testing.run();
-        std::cout << "End of automated tests.\n"; 
-    }
 
     auto myCircle = makeCircle(50);
     auto myCustom = makeCustom(50,10,20);
@@ -23,23 +15,18 @@ int main(int argc, char* argv[]) {
     auto myPolygon = makePolygon(5,50);
     auto myRotatedCustom = makeRotatedShape(myCustom, Angle::R90);
     auto myShapeList = {myCircle,myRectangle,myPolygon};
-    //auto myTriangle = makeTriangle(100);
     
-    auto myCompositeShapes = makeCompositeShape(myShapeList);
-    /**************** GOAL IS TO DELETE THESE **********************/
-    //auto myLayeredShapes = makeLayeredShape(myShapeList);
-    //auto myVerticalShapes = makeVerticalShape(myShapeList);
-    //auto myHorizontal = makeHorizontalShape(myShapeList);
-    /**************** GOAL IS TO DELETE ABOVE **********************/
+    auto myLayeredShapes = makeLayeredShape(myShapeList);
+    auto myVerticalShapes = makeVerticalShape(myShapeList);
+    auto myHorizontalShapes = makeHorizontalShape(myShapeList);
 
-    //printPostScript(std::cout, myTriangle);
     //printPostScript(std::cout, myCircle);
     //printPostScript(std::cout, myCustom);
     //printPostScript(std::cout, myRectangle);
     //printPostScript(std::cout, myPolygon);
-    //printPostScript(std::cout, myRotatedCustom);
-    /*printPostScript(std::cout, myLayeredShapes);
+    printPostScript(std::cout, myRotatedCustom);
     printPostScript(std::cout, myLayeredShapes);
-    printPostScript(std::cout, myLayeredShapes);*/
+    printPostScript(std::cout, myVerticalShapes);
+    printPostScript(std::cout, myHorizontalShapes);
     return 0;
 }
